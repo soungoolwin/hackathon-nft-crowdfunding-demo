@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  name        String
+  tagline     String
+  description String   @db.Text
+  category    String
+  githubUrl   String
+  demoUrl     String?
+  imageUrl    String?
+  fundingGoal Int?
+  fundsRaised Int      @default(0)
+  nftMinted   Boolean  @default(false)
+  nftTokenId  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  team        TeamMember[]
+  
+  @@index([category])
+  @@index([createdAt])
+}
+
+model TeamMember {
+  id            String  @id @default(cuid())
+  name          String
+  role          String
+  walletAddress String
+  projectId     String
+  project       Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  @@index([projectId])
+  @@index([walletAddress])
+}
