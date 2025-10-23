@@ -3,6 +3,8 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Project } from "@/types/project";
 import CopyButton from "@/components/CopyButton";
+import MintNFTButton from "@/components/MintNFTButton";
+import WalletStatus from "@/components/WalletStatus";
 
 interface ProjectPageProps {
   params: Promise<{
@@ -67,26 +69,11 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               </span>
             </Link>
             <div className="flex items-center gap-3">
-              {project.nftMinted ? (
-                <div className="flex items-center gap-2 px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg text-sm font-medium">
-                  <svg
-                    className="w-4 h-4"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  NFT Minted
-                </div>
-              ) : (
-                <button className="px-6 py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-lg font-medium transition-colors">
-                  Mint NFT
-                </button>
-              )}
+              <MintNFTButton
+                projectTeam={project.team}
+                nftMinted={project.nftMinted || false}
+                projectId={project.id}
+              />
               <button className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors">
                 Fund Project
               </button>
@@ -144,6 +131,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 </div>
               )}
             </div>
+
+            {/* Wallet Status */}
+            <WalletStatus projectTeam={project.team} />
 
             {/* About Section */}
             <div className="bg-white dark:bg-slate-900 rounded-xl p-8 border border-slate-200 dark:border-slate-800">

@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "db:seed": "npx tsx prisma/seed.ts",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "test:pinata": "npx tsx scripts/test-pinata.ts"
   },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"
@@ -18,6 +19,8 @@
     "@tanstack/react-query": "^5.90.5",
     "@wagmi/connectors": "^6.0.1",
     "@wagmi/core": "^2.22.1",
+    "axios": "^1.12.2",
+    "form-data": "^4.0.4",
     "next": "15.5.6",
     "prisma": "^6.17.1",
     "react": "^18.3.1",
