@@ -1,7 +1,8 @@
 // Smart Contract Configuration
 export const CONTRACT_CONFIG = {
   // Your deployed contract address on Polygon Amoy Testnet
-  address: process.env.CONTRACT_ADDRESS as `0x${string}`,
+  address: (process.env.NEXT_PUBLIC_CONTRACT_ADDRESS ||
+    process.env.CONTRACT_ADDRESS) as `0x${string}`,
 
   // Polygon Amoy Testnet
   chainId: parseInt(process.env.CONTRACT_CHAIN_ID || "80002"),
@@ -122,6 +123,9 @@ export const NETWORK_CONFIG = {
 export function validateContractConfig(): boolean {
   if (!CONTRACT_CONFIG.address) {
     console.error("❌ CONTRACT_ADDRESS not configured in .env.local");
+    console.error(
+      "💡 Make sure to add NEXT_PUBLIC_CONTRACT_ADDRESS to .env.local"
+    );
     return false;
   }
 
