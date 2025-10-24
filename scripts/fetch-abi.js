@@ -1,13 +1,13 @@
-// Script to fetch the actual ABI from Polygonscan
+// Script to fetch the actual ABI from Etherscan
 const https = require("https");
 
-const CONTRACT_ADDRESS = "0xf6373350498616122F1FDd993812D54b6803975E";
-const POLYGONSCAN_API_URL = `https://api-amoy.polygonscan.com/api?module=contract&action=getabi&address=${CONTRACT_ADDRESS}`;
+const CONTRACT_ADDRESS = "0x3b3d58d32a33741a8b44a7f36c9e9759804ff4ad";
+const ETHERSCAN_API_URL = `https://api-sepolia.etherscan.io/api?module=contract&action=getabi&address=${CONTRACT_ADDRESS}`;
 
 async function fetchABI() {
   return new Promise((resolve, reject) => {
     https
-      .get(POLYGONSCAN_API_URL, (res) => {
+      .get(ETHERSCAN_API_URL, (res) => {
         let data = "";
 
         res.on("data", (chunk) => {
@@ -38,7 +38,7 @@ async function fetchABI() {
 
 async function testWithRealABI() {
   try {
-    console.log("🔍 Fetching contract ABI from Polygonscan...");
+    console.log("🔍 Fetching contract ABI from Etherscan...");
     const abi = await fetchABI();
 
     console.log("✅ ABI fetched successfully");

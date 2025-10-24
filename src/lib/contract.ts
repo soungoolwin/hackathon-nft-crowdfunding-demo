@@ -1,11 +1,11 @@
 // Smart Contract Configuration
 export const CONTRACT_CONFIG = {
-  // Your deployed contract address on Polygon Amoy Testnet
+  // Your deployed contract address on Sepolia Ethereum Testnet
   address: (process.env.NEXT_PUBLIC_CONTRACT_ADDRESS ||
     process.env.CONTRACT_ADDRESS) as `0x${string}`,
 
-  // Polygon Amoy Testnet
-  chainId: parseInt(process.env.CONTRACT_CHAIN_ID || "80002"),
+  // Sepolia Ethereum Testnet
+  chainId: parseInt(process.env.CONTRACT_CHAIN_ID || "11155111"),
 
   // Contract ABI (simplified version of your deployed contract)
   abi: [
@@ -106,15 +106,15 @@ export const CONTRACT_CONFIG = {
   ] as const,
 };
 
-// Network configuration for Polygon Amoy Testnet
+// Network configuration for Sepolia Ethereum Testnet
 export const NETWORK_CONFIG = {
-  chainId: 80002,
-  name: "Polygon Amoy Testnet",
-  rpcUrl: "https://rpc-amoy.polygon.technology",
-  blockExplorer: "https://amoy.polygonscan.com",
+  chainId: 11155111,
+  name: "Sepolia Testnet",
+  rpcUrl: "https://sepolia.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161", // Public Infura endpoint
+  blockExplorer: "https://sepolia.etherscan.io",
   nativeCurrency: {
-    name: "MATIC",
-    symbol: "MATIC",
+    name: "ETH",
+    symbol: "ETH",
     decimals: 18,
   },
 };
