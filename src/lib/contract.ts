@@ -7,8 +7,9 @@ export const CONTRACT_CONFIG = {
   // Sepolia Ethereum Testnet
   chainId: parseInt(process.env.CONTRACT_CHAIN_ID || "11155111"),
 
-  // Contract ABI (simplified version of your deployed contract)
+  // Contract ABI (includes events for proper log parsing)
   abi: [
+    // Functions
     {
       inputs: [
         {
@@ -102,6 +103,110 @@ export const CONTRACT_CONFIG = {
       ],
       stateMutability: "view",
       type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "string",
+          name: "databaseProjectId",
+          type: "string",
+        },
+      ],
+      name: "getProjectInfo",
+      outputs: [
+        {
+          components: [
+            {
+              internalType: "string",
+              name: "databaseId",
+              type: "string",
+            },
+            {
+              internalType: "string",
+              name: "metadataUri",
+              type: "string",
+            },
+            {
+              internalType: "address",
+              name: "minter",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "tokenId",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "mintedAt",
+              type: "uint256",
+            },
+          ],
+          internalType: "struct HackathonNFT.ProjectInfo",
+          name: "",
+          type: "tuple",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    // Events - ERC721 Transfer event (required for token ID extraction)
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
+          internalType: "address",
+          name: "from",
+          type: "address",
+        },
+        {
+          indexed: true,
+          internalType: "address",
+          name: "to",
+          type: "address",
+        },
+        {
+          indexed: true,
+          internalType: "uint256",
+          name: "tokenId",
+          type: "uint256",
+        },
+      ],
+      name: "Transfer",
+      type: "event",
+    },
+    // Custom HackathonNFTMinted event
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
+          internalType: "string",
+          name: "databaseProjectId",
+          type: "string",
+        },
+        {
+          indexed: true,
+          internalType: "uint256",
+          name: "tokenId",
+          type: "uint256",
+        },
+        {
+          indexed: true,
+          internalType: "address",
+          name: "minter",
+          type: "address",
+        },
+        {
+          indexed: false,
+          internalType: "string",
+          name: "projectName",
+          type: "string",
+        },
+      ],
+      name: "HackathonNFTMinted",
+      type: "event",
     },
   ] as const,
 };
