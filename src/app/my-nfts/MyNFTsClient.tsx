@@ -250,7 +250,7 @@ export default function MyNFTsClient({ projects }: MyNFTsClientProps) {
                   {ownedNFTs.map((project) => (
                     <Link
                       key={project.id}
-                      href={`/projects/${project.id}`}
+                      href={`/transfer/${project.id}`}
                       className="group bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-all"
                     >
                       <div className="relative h-48 overflow-hidden bg-gradient-to-br from-violet-500 to-indigo-600">
