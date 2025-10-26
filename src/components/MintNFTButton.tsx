@@ -191,22 +191,145 @@ export default function MintNFTButton({
 
       // Step 9: Get token ID from transaction logs
       console.log("🔍 Step 5: Extracting token ID from transaction logs...");
-      const mintEvent = receipt.logs.find((log: any) => {
+      console.log("📋 Total logs:", receipt.logs.length);
+
+      let tokenId: any = null;
+
+      // Try to find custom mint event first
+      const customMintEvent = receipt.logs.find((log: any) => {
         try {
           const parsed = contract.interface.parseLog(log);
-          return parsed?.name === "HackathonNFTMinted";
+          return (
+            parsed?.name === "HackathonNFTMinted" ||
+            parsed?.name === "NFTMinted"
+          );
         } catch {
           return false;
         }
       });
 
-      if (!mintEvent) {
-        console.error("❌ Could not find mint event in transaction logs");
-        throw new Error("Could not find mint event in transaction logs");
+      if (customMintEvent) {
+        console.log("✅ Found custom mint event");
+        try {
+          const parsedEvent = contract.interface.parseLog(customMintEvent);
+
+          if (parsedEvent) {
+            console.log("📝 Parsed event:", parsedEvent.name);
+            console.log("📝 Event args:", parsedEvent.args);
+
+            // Try different argument positions
+            if (parsedEvent.args[1]) {
+              tokenId = parsedEvent.args[1];
+            } else if (
+              parsedEvent.args[0] &&
+              typeof parsedEvent.args[0] === "object"
+            ) {
+              // If first arg is a BigNumber
+              tokenId = parsedEvent.args[0];
+            }
+          }
+        } catch (parseError) {
+          console.error("⚠️ Could not parse custom mint event:", parseError);
+        }
       }
 
-      const parsedEvent = contract.interface.parseLog(mintEvent);
-      const tokenId = parsedEvent?.args[1]; // tokenId is the second argument
+      // If no custom event found, look for Transfer event (ERC721 standard)
+      if (!tokenId) {
+        console.log(
+          "🔍 Custom mint event not found, looking for ERC721 Transfer event..."
+        );
+
+        for (const log of receipt.logs) {
+          try {
+            const parsed = contract.interface.parseLog(log);
+            console.log("📋 Checking log:", parsed?.name, parsed?.args);
+
+            // Check for ERC721 Transfer event (indexed topics: from, to, tokenId)
+            if (parsed?.name === "Transfer") {
+              const fromAddress = parsed.args[0];
+              const toAddress = parsed.args[1];
+              const logTokenId = parsed.args[2];
+
+              console.log("✅ Found Transfer event:", {
+                from: fromAddress,
+                to: toAddress,
+                tokenId: logTokenId?.toString(),
+              });
+
+              // If transferring from zero address (mint), get the token ID
+              if (
+                fromAddress === ethers.ZeroAddress ||
+                fromAddress === "0x0000000000000000000000000000000000000000"
+              ) {
+                tokenId = logTokenId;
+                console.log("✅ Found mint Transfer event (from zero address)");
+                break;
+              }
+            }
+          } catch {
+            // Skip logs that can't be parsed
+            continue;
+          }
+        }
+      }
+
+      // If still no token ID, try to get it from contract directly by querying getProjectInfo
+      if (!tokenId) {
+        console.log(
+          "🔍 Token ID not found in events, querying contract directly..."
+        );
+        try {
+          // Get the most recent project info
+          const projectInfo = await contract.getProjectInfo(projectId);
+          console.log("📋 Project info from contract:", projectInfo);
+
+          if (projectInfo && projectInfo.tokenId) {
+            tokenId = projectInfo.tokenId;
+            console.log("✅ Got token ID from contract:", tokenId.toString());
+          }
+        } catch (queryError) {
+          console.error(
+            "⚠️ Could not query contract for token ID:",
+            queryError
+          );
+        }
+      }
+
+      // If still no token ID, just update the database with null tokenId and show success
+      if (!tokenId) {
+        console.log(
+          "⚠️ Could not extract token ID, but transaction was successful!"
+        );
+        console.log("💡 Updating database without token ID...");
+
+        // Update database with just the transaction hash
+        const updateResponse = await fetch(
+          `/api/projects/${projectId}/update-nft`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              transactionHash: mintTx.hash,
+            }),
+          }
+        );
+
+        if (!updateResponse.ok) {
+          const errorData = await updateResponse.json();
+          console.error("❌ Database update failed:", errorData.error);
+        } else {
+          console.log("✅ Database updated without token ID");
+        }
+
+        // Show success even without token ID
+        alert(
+          `🎉 NFT Minted Successfully!\n\nTransaction confirmed on Sepolia Ethereum Testnet.\n\nTransaction Hash: ${mintTx.hash}\n\nNote: Token ID extraction failed, but your NFT was minted successfully.`
+        );
+        return;
+      }
+
       console.log("✅ Token ID extracted:", tokenId.toString());
 
       // Step 10: Update database
