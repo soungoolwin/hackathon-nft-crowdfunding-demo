@@ -39,14 +39,19 @@ export default function MyNFTsClient({ projects }: MyNFTsClientProps) {
   const { isConnected, address, isConnecting, error } = useMetaMask();
   const [ownedNFTs, setOwnedNFTs] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    if (isConnected && address) {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (isConnected && address && isMounted) {
       checkOwnedNFTs();
     } else {
       setOwnedNFTs([]);
     }
-  }, [isConnected, address]);
+  }, [isConnected, address, isMounted]);
 
   const checkOwnedNFTs = async () => {
     if (!address || !window.ethereum) {
@@ -72,11 +77,20 @@ export default function MyNFTsClient({ projects }: MyNFTsClientProps) {
           try {
             const owner = await contract.ownerOf(project.nftTokenId);
 
+            // Check if owner is valid (not null or zero address)
+            if (!owner || owner === ethers.ZeroAddress || owner === "0x") {
+              console.log(
+                `Skipping project ${project.id} - invalid owner or token burned`
+              );
+              continue;
+            }
+
             // Check if the current wallet owns this NFT
             if (owner.toLowerCase() === address.toLowerCase()) {
               ownedProjects.push(project);
             }
           } catch (err) {
+            // Silently skip if token doesn't exist or was burned
             console.error(
               `Error checking ownership for project ${project.id}:`,
               err
@@ -93,8 +107,7 @@ export default function MyNFTsClient({ projects }: MyNFTsClientProps) {
     }
   };
 
-  const isMounted = typeof window !== "undefined";
-
+  // Prevent hydration mismatch
   if (!isMounted) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-8">
